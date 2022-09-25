@@ -1,8 +1,35 @@
 --task 4
-select top 1 salesManagerId as manager, sum(salesRub) as summ 
+select top 1 salesManagerId as manager, sum(salesRub) as summ
 from distributor.sales
-WHERE salesManagerId is not null 
+WHERE salesManagerId is not null and branchId = 3 and dateId BETWEEN '2014-01-01' and '2014-01-31'
 group by salesManagerId 
 order by summ desc
 
+--task 8
+select *
+from distributor.singleSales
+where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
+order by salesRub DESC
 
+--task 12
+select max(salesRub)
+from distributor.singleSales
+where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
+
+--task 16
+select COUNT(DISTINCT companyName)
+from distributor.singleSales
+where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
+
+--task 20
+select top 1 salesManagerId as 'Лучший менеджер по клиентам (id)', count(checkId) as 'Количество обслуженных клиентов'
+from distributor.sales
+where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
+group by salesManagerId
+order by 'Количество обслуженных клиентов' desc
+
+--task 24
+select salesManagerId as manager, AVG(salesRub) as avarege_check
+from distributor.sales
+where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31' and salesManagerId is not null
+group by salesManagerId
