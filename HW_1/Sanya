@@ -22,7 +22,7 @@ from distributor.singleSales
 where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
 
 --task 20
-select top 1 salesManagerId as 'Лучший менеджер по клиентам (id)', count(checkId) as 'Количество обслуженных клиентов'
+select top 1 salesManagerId as 'Лучший менеджер по клиентам (id)', count(DISTINCT checkId) as 'Количество обслуженных клиентов'
 from distributor.sales
 where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
 group by salesManagerId
