@@ -1,7 +1,8 @@
 --task 4
-select salesManagerId as manager, sum(salesRub) as summ 
-from distributor.sales 
+select top 1 salesManagerId as manager, sum(salesRub) as summ 
+from distributor.sales
+WHERE salesManagerId is not null 
 group by salesManagerId 
-order by summ desc 
-OFFSET 1 ROWS 
-FETCH NEXT 1 ROWS ONLY
+order by summ desc
+
+
