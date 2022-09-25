@@ -1,0 +1,8 @@
+--task 4
+select top 1 salesManagerId as manager, sum(salesRub) as summ 
+from distributor.sales
+WHERE salesManagerId is not null 
+group by salesManagerId 
+order by summ desc
+
+
