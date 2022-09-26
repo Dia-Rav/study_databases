@@ -29,7 +29,42 @@ group by salesManagerId
 order by 'Количество обслуженных клиентов' desc
 
 --task 24
-select salesManagerId as manager, AVG(salesRub) as avarege_check
+select manager as 'Менеджер', avg(summ) as 'Средний чек'
+from
+(
+select sum(salesRub) as summ, checkId, avg(salesManagerId) as manager
 from distributor.sales
 where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31' and salesManagerId is not null
-group by salesManagerId
+group by checkId
+) as check_sum
+group by manager
+
+--task 28
+SELECT  AVG(amount) as 'Среднее кол-во артикулов в чеке'
+FROM 
+(
+SELECT COUNT(itemId) as amount, checkId as check_
+FROM distributor.singleSales
+WHERE branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
+GROUP BY checkId
+) as items_in_check
+
+--task 32
+SELECT  manager as 'Двойные агенты'
+FROM 
+(
+SELECT COUNT(DISTINCT branchId) as places_of_work, salesManagerId as manager
+FROM distributor.sales
+GROUP BY salesManagerId
+) as items_in_check
+WHERE places_of_work > 1
+
+--task 36
+select count(distinct checkId) as 'Количество уникальных чеков'
+from
+(
+select sum(salesRub) as summ, checkId, avg(salesManagerId) as manager
+from distributor.sales
+where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
+group by checkId
+) as check_sum
