@@ -22,10 +22,17 @@ WHERE DATEDIFF(DAY, dateId, DATEADD(YEAR, -8, GETDATE())) >= 90
 
 13.	Рассчитать выручку компании в разрезе: Филиал – Дата начало месяца – Товарная категория – выручка компании. 
 Представление данных отсортировать: Филиал, Дата начало месяца, Товарная категория.
+*/
+SELECT branchName, StartOfMonth, category, sum(salesRub) AS revenue
+FROM (
+    select branchName, DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth, category, salesRub
+    FROM distributor.singleSales) AS i
+GROUP by branchName, StartOfMonth, category
+ORDER by branchName, StartOfMonth, category
 
+/*
 17.	Рассчитать выручку компании в разрезе: Менеджер – Бренд – выручка компании. 
 Представленные данные отсортировать: Менеджер, Бренд.
-
 */
 
 SELECT salesManagerId, brand, sum(salesRub) as 'выручка компании'
