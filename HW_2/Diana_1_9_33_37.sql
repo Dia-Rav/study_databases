@@ -18,16 +18,22 @@ order by years, months
 Из нашего примера: 2020-01-03 – 0 шт. Учтите, что даты складирования товара – филиала своя.
 
 29.	Вывести среднюю месячную динамику продаж, по выручке за предыдущие три месяца по менеджерам, 
-для периода год – месяц и отдельно «Дата начало месяца». Т. е. если сейчас 2013-01-01, 
-то я хочу видеть среднюю выручку по менеджерам за 2012-10-01, 2012-11-01,2012-12-0129.
-Вывести среднюю месячную динамику продаж, по выручке за предыдущие три месяца по менеджерам, 
-для периода год – месяц и отдельно «Дата начало месяца». 
-Т. е. если сейчас 2013-01-01, то я хочу видеть среднюю выручку по менеджерам за 2012-10-01, 2012-11-01,2012-12-01
-
-33.	Рассчитать долю загрузки складов для каждого года – месяца.
+для периода год – месяц или отдельно «Дата начало месяца». Т. е. если сейчас 2013-01-01, 
+то я хочу видеть среднюю выручку по менеджерам за 2012-10-01, 2012-11-01,2012-12-01
 
 */
-
+select fullname, StartOfMonth, sales, sum(sales) over(partition by fullname order by fullname, StartOfMonth rows BETWEEN 3 preceding and 1 preceding)
+from(
+    select fullname, DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth, sum(salesRub) as sales
+    from distributor.singleSales
+    where fullname is not NULL
+    group by DATEADD(month, DATEDIFF(month, 0, dateId), 0) , fullname
+    ) as a
+    
+/*
+33.	Рассчитать долю загрузки складов для каждого года – месяца.
+DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth
+*/
 
 select a.*, a.volumeofitems/b.sizeBranch as dolyaofbranch
 from(
