@@ -48,7 +48,11 @@ order by branchId, years, months
 37.	Рассчитать долю продаж эксклюзивного товара к общему, в разрезе каждого Год-Месяца (или дата начало месяца). 
 Только для категории обои.
 */
-
-
+select *, month_sales_item/sum(month_sales_item) over (PARTITION by years, months) as dolya_of_month_sales
+from (
+    select year(dateId) as years, MONTH(dateId) as months, itemId, sum (salesRub) as month_sales_item
+    from distributor.singleSales
+    where category = 'Обои'
+    group by year(dateId), MONTH(dateId), itemId) as a
 
 
