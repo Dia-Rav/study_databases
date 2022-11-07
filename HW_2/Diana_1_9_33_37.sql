@@ -9,20 +9,35 @@ order by years, months
 
 /*
 9.	Найдите все компании, у которых в наименование в начале стоит «ООО», без учета регистра и пробелов вначале
+*/
 
+select distinct companyName
+from distributor.singleSales
+where companyName like N'[ Мa]%'
+order by companyName
+
+--почему оно выводит все???
+
+/*
 21.	В таблицу: distributor.remains представлена информация об остатках, как : 
 Филиал – Артикул товара – Дата – Остаток – СвободныйОстаток. 
 Особенность заполнения данной таблицы, что если остаток на какую-то дату нулевой (для товара и филиала), 
 то в таблицу он не заноситься, например: 2020-01-01 – 10шт., 2020-01-02 – 7шт. 2020-01-04 – 15 шт. 
 Необходимо, восстановить пропуски в данной таблицы и дописать пропущенные значения. 
 Из нашего примера: 2020-01-03 – 0 шт. Учтите, что даты складирования товара – филиала своя.
+*/
 
+
+select top 50*
+from distributor.remains
+order by branchId, itemId, dateId
+/*
 29.	Вывести среднюю месячную динамику продаж, по выручке за предыдущие три месяца по менеджерам, 
 для периода год – месяц или отдельно «Дата начало месяца». Т. е. если сейчас 2013-01-01, 
 то я хочу видеть среднюю выручку по менеджерам за 2012-10-01, 2012-11-01,2012-12-01
 
 */
-select fullname, StartOfMonth, sales, sum(sales) over(partition by fullname order by fullname, StartOfMonth rows BETWEEN 3 preceding and 1 preceding)
+select fullname, StartOfMonth, sales, avg(sales) over(partition by fullname order by fullname, StartOfMonth rows BETWEEN 3 preceding and 1 preceding)
 from(
     select fullname, DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth, sum(salesRub) as sales
     from distributor.singleSales
