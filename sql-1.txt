@@ -1,0 +1,69 @@
+Task 6:
+
+select COUNT(DISTINCT distributor.sales.checkId)
+FROM distributor.sales, distributor.branch
+WHERE distributor.branch.branchName = 'Екатеринбург'
+AND distributor.branch.branchId = distributor.sales.branchId
+AND distributor.sales.salesRub > 10000
+AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
+
+Task 10:
+
+select DISTINCT distributor.salesManager.fullname, distributor.branch.branchName
+FROM distributor.sales, distributor.branch, distributor.salesManager
+WHERE distributor.branch.branchName = 'Екатеринбург'
+AND distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
+AND distributor.branch.branchId = distributor.sales.branchId
+AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
+ORDER BY distributor.salesManager.fullname
+
+Task 14:
+
+select distributor.sales.branchId AS [идентификатор города],
+distributor.sales.checkId AS [идентификатор чека],
+distributor.sales.companyId AS [идентификатор компании],
+distributor.sales.dateId AS 'Дата',
+distributor.sales.itemId AS [ID элемента],
+distributor.sales.sales AS [Количество продаж],
+distributor.sales.salesManagerId AS [ID менеджера],
+distributor.sales.salesRub AS [Суммарная цена продажи]
+FROM distributor.sales, distributor.branch
+WHERE distributor.branch.branchName = 'Екатеринбург'
+AND distributor.branch.branchId = distributor.sales.branchId
+AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
+
+Task 18:
+
+select COUNT( DISTINCT distributor.sales.checkId)/COUNT(DISTINCT distributor.salesManager.fullname) AS [количество покупателей]
+FROM distributor.sales, distributor.branch, distributor.salesManager
+WHERE distributor.branch.branchName = 'Екатеринбург'
+AND distributor.branch.branchId = distributor.sales.branchId
+AND distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
+AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
+
+Task 22:
+
+select checkId, AVG(salesRub) as [средний чек]
+from distributor.singleSales
+WHERE fullname = 'Наумов Сергей'
+GROUP BY checkId
+
+Task 26:
+
+select checkId, AVG(salesRub) AS [средний чек]
+from distributor.singleSales
+WHERE companyName = 'ООО "СОНТАР"'
+GROUP BY checkId
+
+Task 30:
+
+select fullname, sum(salesRub)
+from distributor.singleSales
+WHERE branchName = 'Екатеринбург'
+AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
+AND fullname is not NULL
+GROUP BY fullname
+HAVING sum(salesRub) > 2000000
+
+Task 34:
+
