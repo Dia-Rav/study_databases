@@ -27,3 +27,12 @@ left join distributor.item as c
 on a.itemId = c.itemId) as d
 group by branchName, EOMONTH(dateId), brand
 order by branchName, EOMONTH(dateId), brand
+
+-- part 2, task 12
+select year(dateId) as 'Год', fullname as 'Менеджер', count(companyId) as 'Количество компаний'
+from (select dateId, b.fullname, companyId from distributor.sales as a
+inner join distributor.salesManager as b
+on a.salesManagerId = b.salesManagerId
+WHERE b.fullname is not null and companyId is not null) as d
+group by year(dateId), fullname
+order by year(dateId)
