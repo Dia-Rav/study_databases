@@ -13,10 +13,8 @@ order by years, months
 
 select distinct companyName
 from distributor.singleSales
-where companyName like N'[ Мa]%'
+where replace(lower(companyName), ' ', '') like (N'ооо%')
 order by companyName
-
---почему оно выводит все???
 
 /*
 21.	В таблицу: distributor.remains представлена информация об остатках, как : 
@@ -27,10 +25,10 @@ order by companyName
 Из нашего примера: 2020-01-03 – 0 шт. Учтите, что даты складирования товара – филиала своя.
 */
 
-
 select top 50*
 from distributor.remains
 order by branchId, itemId, dateId
+
 /*
 29.	Вывести среднюю месячную динамику продаж, по выручке за предыдущие три месяца по менеджерам, 
 для периода год – месяц или отдельно «Дата начало месяца». Т. е. если сейчас 2013-01-01, 
