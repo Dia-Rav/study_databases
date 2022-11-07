@@ -1,0 +1,19 @@
+--task 2
+select
+DATEADD(day, 1, EOMONTH(dateId)) as dat, sum(salesRub) as 'Сумма за месяц'
+from distributor.singleSales
+group by EOMONTH(dateId)
+order by EOMONTH(dateId)
+
+--task 6
+select
+year(dateId) as year, DATEPART(QUARTER, dateId) as quarter, sum(salesRub) as 'Сумма за квартал'
+from distributor.singleSales
+group by year(dateId), DATEPART(QUARTER, dateId)
+order by year(dateId), DATEPART(QUARTER, dateId)
+
+--task 10
+select
+SUBSTRING(fullname, 1, CHARINDEX(' ',fullname)) as 'Фамилия', SUBSTRING(fullname, CHARINDEX(' ',fullname), len(fullname) - CHARINDEX(' ',fullname)) as 'Имя', SUBSTRING(fullname, 1, CHARINDEX(' ',fullname) + 1) + '.' as 'Фамилия И.'
+from distributor.singleSales
+group by fullname
