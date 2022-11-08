@@ -28,7 +28,7 @@ on a.itemId = c.itemId) as d
 group by branchName, EOMONTH(dateId), brand
 order by branchName, EOMONTH(dateId), brand
 
--- part 2, task 12
+-- part 2, task 8
 select year(dateId) as 'Год', fullname as 'Менеджер', count(distinct companyId) as 'Количество компаний'
 from (select dateId, b.fullname, companyId from distributor.sales as a
 inner join distributor.salesManager as b
@@ -36,3 +36,15 @@ on a.salesManagerId = b.salesManagerId
 WHERE b.fullname is not null and companyId is not null) as d
 group by year(dateId), fullname
 order by year(dateId)
+
+--part 2, task 16
+select brand, y, m, summ/all_sum as partitionn
+from (
+    SELECT brand, y, m, summ, SUM(summ) over(partition by y, m) as all_sum, ROW_NUMBER() over(partition by y, m order by y, m asc, summ desc) as n
+    from (
+        select brand, year(dateId) as y, MONTH(dateId) as m, sum(salesRub) as summ from distributor.sales as a
+        left join distributor.item as b
+        on a.itemId = b.itemId
+        where brand is not null
+        group by brand, year(dateId), MONTH(dateId)) as c) as f
+WHERE n < 4
