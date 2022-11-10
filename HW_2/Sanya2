@@ -20,7 +20,7 @@ group by fullname
 
 --part 2, task 4
 select branchName as 'Филиал', DATEADD(day, 1, EOMONTH(dateId)) as 'Дата начала месяца', brand as 'Бренд', sum(salesRub) as 'Выручка компании'
-from (select dateId, salesRub, b.branchName, c.brand from distributor.sales as a
+from (select distinct dateId, salesRub, b.branchName, c.brand from distributor.sales as a
 left join distributor.branch as b
 on a.branchId = b.branchId
 left join distributor.item as c
@@ -42,7 +42,7 @@ select brand, y, m, summ/all_sum as partitionn
 from (
     SELECT brand, y, m, summ, SUM(summ) over(partition by y, m) as all_sum, ROW_NUMBER() over(partition by y, m order by y, m asc, summ desc) as n
     from (
-        select brand, year(dateId) as y, MONTH(dateId) as m, sum(salesRub) as summ from distributor.sales as a
+        select distinct brand, year(dateId) as y, MONTH(dateId) as m, sum(salesRub) as summ from distributor.sales as a
         left join distributor.item as b
         on a.itemId = b.itemId
         where brand is not null
