@@ -48,3 +48,19 @@ from (
         where brand is not null
         group by brand, year(dateId), MONTH(dateId)) as c) as f
 WHERE n < 4
+
+--part 2, task 20
+
+declare @vdate datetime
+set @vdate = '12/01/15'
+
+select fullname, dat, avg(summ) as 'Средний чек'
+from(
+    select avg(salesManagerId) as salesManagerid, DATEADD(day, 1, EOMONTH(dateId)) as dat, sum(salesRub) as summ
+    from distributor.sales
+    group by EOMONTH(dateId), checkId
+    ) as a
+inner join distributor.salesManager as b
+on a.salesManagerid = b.salesManagerId
+where dat = dateadd(month, -1, @vdate) or dat = dateadd(month, -2, @vdate) or dat = dateadd(month, -3, @vdate)
+group by dat, fullname
