@@ -76,3 +76,15 @@ left join distributor.branch as d
 on answer.branchId = d.branchId
 group by branchName, yearId, monthId
 order by branchName, yearId, monthId
+
+select branchName, yearId, monthId, sum(sum_in_rubles) as cost
+from (select branchId, yearId, monthId, (basePrice * value) * remains as sum_in_rubles from distributor.remains as a
+inner join distributor.ddp as b
+on a.itemId = b.itemId
+inner join distributor.currency as c
+on a.dateId = c.dateId and b.currencyPurchase = c.currency
+where basePrice is not null) as answer
+left join distributor.branch as d
+on answer.branchId = d.branchId
+group by branchName, yearId, monthId
+order by branchName, yearId, monthId
