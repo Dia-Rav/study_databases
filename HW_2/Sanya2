@@ -88,3 +88,17 @@ left join distributor.branch as d
 on answer.branchId = d.branchId
 group by branchName, yearId, monthId
 order by branchName, yearId, monthId
+
+-- part 2, task 27
+select dat, exlusive_sum/summ as exclusive_part_in_sales
+from (select DATEADD(day, 1, EOMONTH(dateId)) as dat, sum(salesRub) as summ 
+from distributor.sales
+group by EOMONTH(dateId)) as summa
+inner join (select DATEADD(day, 1, EOMONTH(dateId)) as dat2, sum(salesRub) as exlusive_sum 
+from distributor.sales as a
+inner join distributor.item as b
+on a.itemId = b.itemId
+where exclusive = 'Да'
+group by EOMONTH(dateId)) as exlus
+on summa.dat = exlus.dat2
+order by dat
