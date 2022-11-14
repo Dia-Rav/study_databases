@@ -67,23 +67,16 @@ group by dat, fullname
 
 -- part 2, task 24
 select branchName, yearId, monthId, sum(sum_in_rubles) as cost
-from (select branchId, yearId, monthId, (DDP * value) * remains as sum_in_rubles from distributor.remains as a
+from (select branchId, yearId, monthId, sum_in_rubles =
+    CASE b.currencyPurchase
+        WHEN null then DDP * remains 
+        else (DDP * value) * remains
+    end
+from distributor.remains as a
 inner join distributor.ddp as b
-on a.itemId = b.itemId
+on a.itemId = b.itemId and year(a.dateId) = b.yearId and month(a.dateId) = b.monthId
 inner join distributor.currency as c
 on a.dateId = c.dateId and b.currencyPurchase = c.currency) as answer
-left join distributor.branch as d
-on answer.branchId = d.branchId
-group by branchName, yearId, monthId
-order by branchName, yearId, monthId
-
-select branchName, yearId, monthId, sum(sum_in_rubles) as cost
-from (select branchId, yearId, monthId, (basePrice * value) * remains as sum_in_rubles from distributor.remains as a
-inner join distributor.ddp as b
-on a.itemId = b.itemId
-inner join distributor.currency as c
-on a.dateId = c.dateId and b.currencyPurchase = c.currency
-where basePrice is not null) as answer
 left join distributor.branch as d
 on answer.branchId = d.branchId
 group by branchName, yearId, monthId
