@@ -64,3 +64,15 @@ inner join distributor.salesManager as b
 on a.salesManagerid = b.salesManagerId
 where dat = dateadd(month, -1, @vdate) or dat = dateadd(month, -2, @vdate) or dat = dateadd(month, -3, @vdate)
 group by dat, fullname
+
+-- part 2, task 24
+select branchName, yearId, monthId, sum(sum_in_rubles) as cost
+from (select branchId, yearId, monthId, (DDP * value) * remains as sum_in_rubles from distributor.remains as a
+inner join distributor.ddp as b
+on a.itemId = b.itemId
+inner join distributor.currency as c
+on a.dateId = c.dateId and b.currencyPurchase = c.currency) as answer
+left join distributor.branch as d
+on answer.branchId = d.branchId
+group by branchName, yearId, monthId
+order by branchName, yearId, monthId
