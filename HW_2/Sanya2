@@ -75,12 +75,21 @@ from (select branchId, yearId, monthId, sum_in_rubles =
 from distributor.remains as a
 inner join distributor.ddp as b
 on a.itemId = b.itemId and year(a.dateId) = b.yearId and month(a.dateId) = b.monthId
-inner join distributor.currency as c
-on a.dateId = c.dateId and b.currencyPurchase = c.currency) as answer
+left join distributor.currency as c
+on a.dateId = c.dateId and c.currency = 
+CASE trim(b.currencyPurchase)
+    WHEN 'EUR' then 'EUR'
+    WHEN 'EURO' then 'EUR'
+    WHEN 'GBP' then 'GBP'
+    WHEN 'GPB' then 'GBP'
+    WHEN 'USD' then 'USD'
+    WHEN 'RUR' then 'EUR'
+end) as answer
 left join distributor.branch as d
 on answer.branchId = d.branchId
 group by branchName, yearId, monthId
 order by branchName, yearId, monthId
+
 
 -- part 2, task 27
 select dat, exlusive_sum/summ as exclusive_part_in_sales
