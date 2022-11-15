@@ -37,6 +37,21 @@ WHERE b.fullname is not null and companyId is not null) as d
 group by year(dateId), fullname
 order by year(dateId)
 
+-- part 2, task 12
+select *, not_liqv/all_sum as partitionn
+from (select sum(remain) as not_liqv
+from (SELECT *, ROW_NUMBER() over(PARTITION by itemId order by dat) as n
+    from (select itemId, EOMONTH(dateId) as dat, sum(remains) as remain, sum(freeRemains) as free_remain 
+        from distributor.remains
+        where itemId is not null
+        group by itemId, EOMONTH(dateId)) as a
+    where free_remain = 0 and remain != 0) as b
+where n >=6) as c
+left join (
+    select sum(remains) as all_sum
+    from distributor.remains) as d
+on c.not_liqv is not null
+
 --part 2, task 16
 select brand, y, m, summ/all_sum as partitionn
 from (
