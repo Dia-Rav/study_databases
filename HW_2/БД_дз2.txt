@@ -1,0 +1,75 @@
+Task 3
+select companyName, abs(avg([промежуток между покупками]))
+from(
+    select *, DATEDIFF(day, dateId, dateId2) as [промежуток между покупками] // day->month
+    from(
+        select *, LAG(dateId) over(PARTITION by companyName order by dateId) as dateId2
+        from(
+            select companyName, dateId
+            from distributor.singleSales
+            WHERE companyName is not null
+            GROUP BY companyName, dateId) as a) as b
+    WHERE DATEDIFF(month, dateId, dateId2) is not NULL) as c
+GROUP BY companyName
+
+Task 7
+select year(dateId) as [year], DATEPART(weekday, dateId) as [day of the week], sum(salesRub)
+from distributor.singleSales
+group by year(dateId), DATEPART(weekday, dateId)
+order by year(dateId)
+
+Task 1
+select year(dateId) as [year], month(dateId) as [month], branchId, sum(salesRub) as revenue
+from distributor.sales
+where branchId is not null
+group by year(dateId),month(dateId) , branchId
+order by branchId
+
+Task 13
+select *
+from(select a.brand, a.itemId, a.revenue, ROW_NUMBER() over(PARTITION by a.brand order by a.revenue DESC) as rn
+    from(select it.brand, s.itemId, sum(s.salesRub) as revenue
+        from distributor.sales as s INNER Join distributor.item as it
+        ON (it.itemId = s.itemId)
+        WHERE it.brand is not null
+        group by s.itemId, it.brand) as a) as b
+WHERE rn <= 3
+
+Task 25
+
+select a.weekday, CAST(a.quantity as float)/CAST(a.sum_q as float) as [колич. коэффициент], 
+CAST(a.money as float)/CAST(a.sum_m as float) as [цен. коэфф.]
+from(SELECT DISTINCT DATEPART(weekday, s.dateId) as weekday, count(s.itemId) over(PARTITION by DATEPART(weekday, s.dateId)) as quantity,
+    count(s.itemId) over (PARTITION by 1) as sum_q, count(s.salesRub) over (PARTITION by 1) as sum_m,
+    count(s.salesRub) over(PARTITION by DATEPART(weekday, s.dateId)) as money
+    from distributor.sales as s inner join distributor.item as it
+    ON s.itemId = it.itemId
+    WHERE it.category = 'Обои'
+    AND s.itemId is not null
+    ) as a
+order by a.weekday
+
+Task 9 (не учитывал приоритет рубля над долларом, т.к. было)
+SELECT years, sum(net_profit) as 'net profit'
+fROM(
+SELECT year(b.dateId) as years, b.itemId, b.salesRub, b.value, b.DDP,
+CASE
+WHEN b.value is null then b.salesRub - b.DDP
+ELSE b.salesRub - b.DDP * b.value
+END as net_profit
+from(select s.checkId, s.itemId, s.dateId, s.salesRub,d.currencyPurchase, d.DDP, c.value
+from distributor.sales as s
+inner join (select ddp.*, CASE
+When currencyPurchase like 'E%'then 'EUR'
+WHEN currencyPurchase like 'R%'then 'RUB'
+WHEN currencyPurchase like '%-%'then 'RUB'
+WHEN currencyPurchase like 'G%'then 'GBP'
+WHEN currencyPurchase like 'U%'then 'USD'
+else TRIM(currencyPurchase)
+end as currency1
+from distributor.ddp) as d
+on s.itemId = d.itemId and d.monthId = month(s.dateId) and d.yearId = year(s.dateId)
+left join distributor.currency as c
+on s.dateId = c.dateId and d.currencyPurchase = c.currency) as b ) as f
+group by years
+order by years
