@@ -49,7 +49,7 @@ from(SELECT DISTINCT DATEPART(weekday, s.dateId) as weekday, count(s.itemId) ove
     ) as a
 order by a.weekday
 
-Task 9 (не учитывал приоритет рубля над долларом, т.к. было)
+Task 9 (доработал!!!)
 SELECT years, sum(net_profit) as 'net profit'
 fROM(
 SELECT year(b.dateId) as years, b.itemId, b.salesRub, b.value, b.DDP,
@@ -57,19 +57,25 @@ CASE
 WHEN b.value is null then b.salesRub - b.DDP
 ELSE b.salesRub - b.DDP * b.value
 END as net_profit
-from(select s.checkId, s.itemId, s.dateId, s.salesRub,d.currencyPurchase, d.DDP, c.value
+from(select s.checkId, s.itemId, s.dateId, s.salesRub,d.currency1, d.DDP, c.value
 from distributor.sales as s
-inner join (select ddp.*, CASE
-When currencyPurchase like 'E%'then 'EUR'
-WHEN currencyPurchase like 'R%'then 'RUB'
-WHEN currencyPurchase like '%-%'then 'RUB'
-WHEN currencyPurchase like 'G%'then 'GBP'
-WHEN currencyPurchase like 'U%'then 'USD'
-else TRIM(currencyPurchase)
-end as currency1
-from distributor.ddp) as d
+inner join (select t.*
+from(select p.itemId, p.DDP, p.monthId, p.yearId, p.currency1, ROW_NUMBER() over(partition by p.itemId, p.dates order by p.currency1) as rn
+    from
+        (select DISTINCT ddp.DDP, ddp.itemId, ddp.yearId*100 + ddp.monthId as dates, ddp.monthId, ddp.yearId, CASE
+        When currencyPurchase like 'E%'then 'EUR'
+        WHEN currencyPurchase like 'R%'then 'RUB'
+        WHEN currencyPurchase like '%-%'then 'RUB'
+        WHEN currencyPurchase like 'G%'then 'GBP'
+        WHEN currencyPurchase like 'U%'then 'USD'
+        WHEN currencyPurchase is null then 'RUB'
+        else TRIM(currencyPurchase)
+        end as currency1
+        from distributor.ddp
+        where ddp.DDP is not null) as p) as t
+where t.rn = 1) as d
 on s.itemId = d.itemId and d.monthId = month(s.dateId) and d.yearId = year(s.dateId)
 left join distributor.currency as c
-on s.dateId = c.dateId and d.currencyPurchase = c.currency) as b ) as f
+on s.dateId = c.dateId and d.currency1 = c.currency) as b ) as f
 group by years
 order by years
