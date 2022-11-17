@@ -81,6 +81,19 @@ on s.dateId = c.dateId and d.currency1 = c.currency) as b ) as f
 group by years
 order by years
 
+Task 17
+select c.dates, c.quantity
+from(select b.*, ROW_NUMBER() over(PARTITION by dates order by quantity DESC) as rn
+from(select DATEFROMPARTS(year(a.dateId), month(a.dateId), 1) as dates,
+sum(a.qua) over(PARTITION BY 1 order by DATEFROMPARTS(year(a.dateId), month(a.dateId), 1)
+rows between  180 following and UNBOUNDED FOLLOWING) as quantity
+from(select distinct dateId, count(itemId) over(PARTITION BY dateId order by dateId) as qua 
+    from distributor.sales
+    where itemId is not NULL) as a
+) as b) as c
+where c.rn = 1
+order by c.dates
+
 Task 21
 select sm.fullname, c.companyName, t.years, t.months, t.rev
 from(select r.salesManagerId, r.companyId, r.years, r.months, r.revenue + r.prev1Revenue + r.prev2Revenue as rev,
