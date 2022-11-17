@@ -1,3 +1,4 @@
+
 Task 3
 select companyName, abs(avg([промежуток между покупками]))
 from(
@@ -79,3 +80,29 @@ left join distributor.currency as c
 on s.dateId = c.dateId and d.currency1 = c.currency) as b ) as f
 group by years
 order by years
+
+Task 21
+select sm.fullname, c.companyName, t.years, t.months, t.rev
+from(select r.salesManagerId, r.companyId, r.years, r.months, r.revenue + r.prev1Revenue + r.prev2Revenue as rev,
+    ROW_NUMBER() over(PARTITION by r.salesManagerId, r.years, r.months order by r.revenue + r.prev1Revenue + r.prev2Revenue DESC) as rn
+    from(select s.salesManagerId, s.companyId, s.years, s.months, s.revenue,
+        CASE
+        WHEN abs(s.months - s.prev1Month) = 1 then LAG(s.revenue, 1, 0) over(partition by s.salesManagerId, s.companyId, s.years order by s.months)
+        ELSE 0
+        END as prev1Revenue,
+        CASE
+        WHEN abs(s.months - s.prev2Month) = 2 then LAG(s.revenue, 2, 0) over(partition by s.salesManagerId, s.companyId, s.years order by s.months)
+        WHEN abs(s.months - s.prev1Month) = 2 then LAG(s.revenue, 1, 0) over(partition by s.salesManagerId, s.companyId, s.years order by s.months)
+        ELSE 0
+        END as prev2Revenue
+        from(select b.*, LAG(b.months, 1, 0) over(partition by b.salesManagerId, b.companyId, b.years order by b.months) as prev1Month,
+            LAG(b.months, 2, 0) over(partition by b.salesManagerId, b.companyId, b.years order by b.months) as prev2Month
+            from(select DISTINCT salesManagerId, companyId, year(dateId) as years, month(dateId) as months,
+                    sum(salesRub) over(partition by salesManagerId, companyId, year(dateId), month(dateId) order by salesManagerId) as revenue
+                    from distributor.sales
+                    where salesManagerId is not null
+                    ) as b) as s) as r) as t
+inner join distributor.salesManager as sm on sm.salesManagerId = t.salesManagerId
+inner join distributor.company as c on c.companyId = t.companyId
+where t.rn < 6
+order by t.salesManagerId, t.years, t.months, t.rev DESC
