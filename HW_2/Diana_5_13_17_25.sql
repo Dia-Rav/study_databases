@@ -25,7 +25,8 @@ WHERE DATEDIFF(DAY, dateId, DATEADD(YEAR, -8, GETDATE())) >= 90
 SELECT branchName, StartOfMonth, category, sum(salesRub) AS revenue
 FROM (
     select branchName, DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth, category, salesRub
-    FROM distributor.singleSales) AS i
+    FROM distributor.singleSales
+    WHERE branchName is not Null) AS i
 GROUP by branchName, StartOfMonth, category
 ORDER by branchName, StartOfMonth, category
 
@@ -38,8 +39,10 @@ SELECT salesManagerId, brand, sum(salesRub) as 'выручка компании'
 FROM distributor.sales as s
 JOIN distributor.item as i
 on i.itemId = s.itemId 
+WHERE salesManagerId is not NULL and brand is not NULL 
 GROUP BY salesManagerId, brand
 ORDER by salesManagerId, brand
+
 
 
 /*

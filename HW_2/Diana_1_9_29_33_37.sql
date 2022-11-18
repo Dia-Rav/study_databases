@@ -13,7 +13,7 @@ order by years, months
 
 select distinct companyName
 from distributor.singleSales
-where replace(lower(companyName), ' ', '') like (N'ооо%')
+where replace(lower(companyName), ' ', '') like (N'ма%')
 order by companyName
 
 /*
