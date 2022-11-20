@@ -26,6 +26,44 @@ where branchId is not null
 group by year(dateId),month(dateId) , branchId
 order by branchId
 
+Task 5
+--Показывает отличающиеся строки
+select branchName as 'Филиал', DATEADD(day, 1, EOMONTH(dateId)) as 'Дата начала месяца', sum(salesRub) as 'Выручка компании'
+from (select distinct dateId, salesRub, b.branchName from distributor.sales as a
+left join distributor.branch as b
+on a.branchId = b.branchId) as d
+group by branchName, EOMONTH(dateId)
+EXCEPT
+select branchName as 'Филиал', DATEADD(day, 1, EOMONTH(dateId)) as 'Дата начала месяца', sum(salesRub) as 'Выручка компании'
+from (select distinct dateId, salesRub, b.branchName, c.brand from distributor.sales as a
+left join distributor.branch as b
+on a.branchId = b.branchId
+left join distributor.item as c
+on a.itemId = c.itemId) as d
+group by branchName, EOMONTH(dateId), brand
+
+--Разница в суммах прибыли:
+select top 1 revenue - rev1 as differences 
+from(select f.*, LAG(revenue, 1, 0) over(order by revenue) as rev1
+from(select sum(g.[Выручка компании]) as revenue
+from(
+select branchName as 'Филиал', DATEADD(day, 1, EOMONTH(dateId)) as 'Дата начала месяца', sum(salesRub) as 'Выручка компании'
+from (select distinct dateId, salesRub, b.branchName from distributor.sales as a
+left join distributor.branch as b
+on a.branchId = b.branchId) as d
+group by branchName, EOMONTH(dateId)) as g
+UNION
+select sum(g.[Выручка компании]) as revenue
+from(
+select branchName as 'Филиал', DATEADD(day, 1, EOMONTH(dateId)) as 'Дата начала месяца', sum(salesRub) as 'Выручка компании'
+from (select distinct dateId, salesRub, b.branchName, c.brand from distributor.sales as a
+left join distributor.branch as b
+on a.branchId = b.branchId
+left join distributor.item as c
+on a.itemId = c.itemId) as d
+group by branchName, EOMONTH(dateId), brand) as g) as f) as k
+order by differences
+
 Task 13
 select *
 from(select a.brand, a.itemId, a.revenue, ROW_NUMBER() over(PARTITION by a.brand order by a.revenue DESC) as rn
@@ -119,3 +157,26 @@ inner join distributor.salesManager as sm on sm.salesManagerId = t.salesManagerI
 inner join distributor.company as c on c.companyId = t.companyId
 where t.rn < 6
 order by t.salesManagerId, t.years, t.months, t.rev DESC
+
+Task 28 (попробовал отыскать какие обои по материалу и цвету предпочитает каждая компания в определенный месяц, отосртировал по месяцам, чтобы посчитать вклад каждого вида обоев (по двум спецификациям) от суммарной прибыли в определенном месяца на протяжении всех лет. Т.е.выявление сезонных предпочтений как всех компаний, так и по отдельности.
+
+select b.*
+select g.months, g. companyName, g.revenue, g.detail1, g.detail2, CASE 
+WHEN contrib != 0 then revenue/ contrib
+ELse 0
+end as contribution
+from(select month(b.dateId) as months, companyName, revenue, detail1, detail2,
+    sum(revenue) over(partition by month(b.dateId), detail1, detail2 order by revenue) as contrib
+    from(select a.*, ROW_Number() over(PARTITION by month(dateId), companyName order by revenue DESC) as rn
+        from(select s.dateId, com.companyName,sum(s.salesRub) as revenue, sp.detailSpecification3 as detail1, sp.detailSpecification6 as detail2
+        from distributor.sales as s inner join distributor.item as it
+        on it.itemId = s.itemId
+        inner join distributor.specification as sp
+        on s.itemId = sp.itemId
+        inner join distributor.company as com
+        on com.companyId = s.companyId
+        where it.category = 'Обои'
+        group by companyName, dateId, sp.detailSpecification3, sp.detailSpecification6) as a
+        where detail1 is not null and detail2 is not null) as b
+        where b.rn < 4) as g
+order by months ,companyName,  revenue DESC 
