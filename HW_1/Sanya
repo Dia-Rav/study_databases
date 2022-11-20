@@ -39,6 +39,29 @@ group by checkId
 ) as check_sum
 group by manager
 
+--task 27 variant 1
+select top(convert(int, 0.2 * (select count(distinct itemId) from distributor.singleSales WHERE salesRub is not null))) itemId, summ
+from (select itemId, sum(salesRub) as summ
+from distributor.singleSales
+group by itemId) as a
+order by summ DESC
+
+select itemId, summ
+from (select itemId, summ, ROW_NUMBER() over(partition by 1 order by summ desc) as n
+from (select itemId, sum(salesRub) as summ
+from distributor.singleSales
+group by itemId) as a) as b
+where n BETWEEN convert(int, 0.2 * (select count(distinct itemId) from distributor.singleSales WHERE salesRub is not null) + 1) and convert(int, 0.5 * (select count(distinct itemId) from distributor.singleSales WHERE salesRub is not null))
+order by summ DESC
+
+select itemId, summ
+from (select itemId, summ, ROW_NUMBER() over(partition by 1 order by summ desc) as n
+from (select itemId, sum(salesRub) as summ
+from distributor.singleSales
+group by itemId) as a) as b
+where n > convert(int, 0.5 * (select count(distinct itemId) from distributor.singleSales WHERE salesRub is not null))
+order by summ DESC
+
 --task 28
 SELECT  AVG(amount) as 'Среднее кол-во артикулов в чеке'
 FROM 
