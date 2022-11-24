@@ -24,7 +24,8 @@ from (select distinct dateId, salesRub, b.branchName, c.brand from distributor.s
 left join distributor.branch as b
 on a.branchId = b.branchId
 left join distributor.item as c
-on a.itemId = c.itemId) as d
+on a.itemId = c.itemId
+where c.brand is not null and a.branchId is not null) as d
 group by branchName, EOMONTH(dateId), brand
 order by branchName, EOMONTH(dateId), brand
 
@@ -60,7 +61,7 @@ from (
         select distinct brand, year(dateId) as y, MONTH(dateId) as m, sum(salesRub) as summ from distributor.sales as a
         left join distributor.item as b
         on a.itemId = b.itemId
-        where brand is not null
+        where brand is not null and a.itemId is not null
         group by brand, year(dateId), MONTH(dateId)) as c) as f
 WHERE n < 4
 
