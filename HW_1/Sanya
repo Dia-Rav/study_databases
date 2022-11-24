@@ -6,7 +6,7 @@ group by salesManagerId
 order by summ desc
 
 --task 8
-select *
+select top 1 *
 from distributor.singleSales
 where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
 order by salesRub DESC
@@ -23,6 +23,12 @@ where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' an
 
 --task 20
 select top 1 salesManagerId as 'Лучший менеджер по клиентам (id)', count(DISTINCT checkId) as 'Количество обслуженных клиентов'
+from distributor.sales
+where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
+group by salesManagerId
+order by 'Количество обслуженных клиентов' desc
+
+select top 1 salesManagerId as 'Лучший менеджер по клиентам (id)', count(DISTINCT companyId) as 'Количество обслуженных клиентов'
 from distributor.sales
 where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
 group by salesManagerId
@@ -83,6 +89,7 @@ GROUP BY salesManagerId
 WHERE places_of_work > 1
 
 --task 36
+\\Плохой вариант\\
 select count(distinct checkId) as 'Количество уникальных чеков'
 from
 (
@@ -91,3 +98,7 @@ from distributor.sales
 where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
 group by checkId
 ) as check_sum
+
+select count(distinct checkId) as 'Количество уникальных чеков'
+from distributor.sales
+where branchId = 1 and dateId BETWEEN '2014-01-01' and '2014-01-31'
