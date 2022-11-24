@@ -178,3 +178,18 @@ from(
     ) as g
 where stat is not NULL
 order by startMonth, companyName
+
+--26.	Вывести долю занимающих в продажах, различных фабрик. 
+--Если в товаре фабрика не указана, сделать замену на «иные» и так же вывести в долях. Нужно вывести как за весь период, 
+--так и в разрезе Год – Месяц (или дата начало месяца)
+
+select fabrics, years, months, salesRub/sum(salesRub) over (partition by years, months) as dolya_month_sales, (sum(salesRub) over (partition by fabrics))/(sum(salesRub) over (partition by 1))  as dolya_total_sales
+from(
+    select fabrics, years, months, sum(salesRub) as salesRub
+        from(
+            select salesRub , ISNULL(fabrica, 'иные') as fabrics, year(dateId) as years, MONTH(dateId) as months
+            from distributor.singleSales as a
+            left outer join distributor.item as b
+            on b.itemId = a.itemId) as c
+    group by fabrics, years, months) as d
+order by fabrics, years, months
