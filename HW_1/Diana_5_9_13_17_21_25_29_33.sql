@@ -61,8 +61,3 @@ GROUP BY  fullname
 ORDER BY 'Sum of sales' DESC
 
 */
-
-
-
-
-    

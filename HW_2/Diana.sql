@@ -121,9 +121,3 @@ from (
     where b.category = 'Обои'
     and b.exclusive = 'Да'
     group by year(dateId), MONTH(dateId), a.itemId) as a
-
-
-    select top(10) itemId, sum(salesRub)
-    from distributor.sales
-    group by itemId
-    order by sum(salesRub) desc
