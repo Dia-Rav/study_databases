@@ -9,13 +9,12 @@ AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
 
 Task 10:
 
-select DISTINCT distributor.salesManager.fullname, distributor.branch.branchName
-FROM distributor.sales, distributor.branch, distributor.salesManager
-WHERE distributor.branch.branchName = 'Екатеринбург'
-AND distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
-AND distributor.branch.branchId = distributor.sales.branchId
-AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
-ORDER BY distributor.salesManager.fullname
+select *
+from distributor.singleSales
+where dateId BETWEEN '2014-01-01' AND '2014-01-31'
+AND branchName = 'Екатеринбург'
+AND fullname is not null
+order by fullname DESC
 
 Task 14:
 
