@@ -1,53 +1,55 @@
 number7
 
-select TOP 1 checkId,  count(itemId) from distributor.singleSales
+select TOP 1 checkId,  count(itemId) as items
+from distributor.singleSales
 where distributor.singleSales.branchName = 'Екатеринбург'
 and distributor.singleSales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
 group by checkId
-ORDER by count(itemId) desc
+ORDER by items desc
 
 number 11
 
-select  distributor.salesManager.fullname,
-sum(sales) as "transaction", sum(salesRub) as "Продажи"
-from distributor.sales Inner join distributor.salesManager on distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
+select  distributor.salesManager.fullname, salesRub
+from distributor.sales Inner join distributor.salesManager
+on distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
 where distributor.sales.branchId = 3
 and distributor.sales.dateId between '2014-01-01' and '2014-01-31'
 group by distributor.salesManager.fullname
-order by sum(distributor.sales.sales), sum(distributor.sales.salesRub), distributor.salesManager.fullname desc
+order by  distributor.salesManager.fullname desc, salesRub ASC
 
 
 number 15
 
-select count(distributor.sales.salesManagerId) from distributor.sales, distributor.branch, distributor.salesManager
-where distributor.branch.branchName = 'Екатеринбург'
-and distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
-and distributor.branch.branchId = distributor.sales.branchId
-and distributor.sales.dateId between '2014-01-01' and '2014-01-31'
+select count(DISTINCT fullname)
+FROM distributor.singleSales
+WHERE branchName = 'Екатеринбург'
+and dateId BETWEEN '2014-01-01'and '2014-01-31'
 
 number 19
 
-select count(checkId) from distributor.sales, distributor.branch
-where distributor.branch.branchName = 'Екатеринбург'
-and distributor.branch.branchId = distributor.sales.branchId
-and distributor.sales.dateId between '2014-01-01' and '2014-01-31'
+select count(checkId)
+FROM distributor.singleSales
+WHERE branchName = 'Екатеринбург'
+and dateId BETWEEN '2014-01-01' and '2014-01-31'
 
-23)SELECT branchName as филиал, AVG(SalesRub) as средняя_по_филиалу from distributor.singleSales
-where branchName = 'Екатеринбург' and dateId BETWEEN '2014-01-01' and '2014-01-31'
-group by филиал
-27)SELECT itemId as лучшие_товары,  salesRub as цена_товара  from distributor.sales 
-Where salesRub is not NULL AND varc<=(count(salesRub))/5
-window varc as (partition by 1 ORDER BY salesRub DESC);
+23)
+select branchName, avg(sumByBranch)
+from(SELECT branchName as "филиал", sum(salesRub) as sumByBranch
+from distributor.singleSales
+group by branchName, companyName, checkId) as a
+group by branchName, companyName
 
-31)select fullname from distributor.singleSales
+
+31)
+select fullname from distributor.singleSales
 WHERE branchName = 'Екатеринбург'
 AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
 AND fullname is not NULL
 group by fullname
-having count(sales)>50
+having count(distinct checkId)>50
 
-35)select sum(salesRub)/count(checkId) as 'среднее по чеку', sum(salesRub)/sum(sales) as 'среднее по транзакции' from distributor.singleSales
-
+35)
+select sum(salesRub)/count(distinct checkId) as 'среднее по чеку', sum(salesRub)/count(*) as 'среднее по транзакции' from distributor.singleSales
 WHERE branchName = 'Екатеринбург'
 AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
 

@@ -1,11 +1,11 @@
 Task 6:
 
-select COUNT(DISTINCT distributor.sales.checkId)
-FROM distributor.sales, distributor.branch
-WHERE distributor.branch.branchName = 'Екатеринбург'
-AND distributor.branch.branchId = distributor.sales.branchId
-AND distributor.sales.salesRub > 10000
-AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
+select COUNT(DISTINCT checkId)
+FROM distributor.sales
+WHERE branchId =  1
+AND salesRub > 10000
+AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
+
 
 Task 10:
 
@@ -27,14 +27,13 @@ distributor.sales.itemId AS [ID элемента],
 distributor.sales.sales AS [Количество продаж],
 distributor.sales.salesManagerId AS [ID менеджера],
 distributor.sales.salesRub AS [Суммарная цена продажи]
-FROM distributor.sales, distributor.branch
-WHERE distributor.branch.branchName = 'Екатеринбург'
-AND distributor.branch.branchId = distributor.sales.branchId
+FROM distributor.sales
+WHERE distributor.sales.branchId = 1
 AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
 
 Task 18:
 
-select COUNT( DISTINCT distributor.sales.checkId)/COUNT(DISTINCT distributor.salesManager.fullname) AS [количество покупателей]
+select COUNT( DISTINCT distributor.sales.checkId)/COUNT(DISTINCT distributor.salesManager.fullname) AS [количество покупателей на одного менеджера]
 FROM distributor.sales, distributor.branch, distributor.salesManager
 WHERE distributor.branch.branchName = 'Екатеринбург'
 AND distributor.branch.branchId = distributor.sales.branchId
@@ -42,18 +41,20 @@ AND distributor.sales.salesManagerId = distributor.salesManager.salesManagerId
 AND distributor.sales.dateId BETWEEN '2014-01-01' AND '2014-01-31'
 
 Task 22:
-
-select checkId, AVG(salesRub) as [средний чек]
+select a.companyName, avg(a.[чек)] as [средний чек]
+from(select companyName, sum(salesRub) as [чек]
 from distributor.singleSales
 WHERE fullname = 'Наумов Сергей'
-GROUP BY checkId
+GROUP BY checkId) as a 
+group by a.companyName
 
 Task 26:
-
-select checkId, AVG(salesRub) AS [средний чек]
+select companyName, avg(a.[средний чек])
+from(select companyName, sum(salesRub) AS [средний чек]
 from distributor.singleSales
-WHERE companyName = 'ООО "СОНТАР"'
-GROUP BY checkId
+WHERE companyName like '%ООО "СОНТАР"%'
+GROUP BY checkId) as a
+group by companyName
 
 Task 30:
 
@@ -64,6 +65,4 @@ AND dateId BETWEEN '2014-01-01' AND '2014-01-31'
 AND fullname is not NULL
 GROUP BY fullname
 HAVING sum(salesRub) > 2000000
-
-Task 34:
 
