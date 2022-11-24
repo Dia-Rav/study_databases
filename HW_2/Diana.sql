@@ -127,3 +127,54 @@ from (
     from distributor.sales
     group by itemId
     order by sum(salesRub) desc
+    
+    
+    /*22.	У нас есть правило, если клиент:
+a.	Купил товар первый раз и до этого ни разу не покупал, то ему присваиваться статус – Новый
+b.	Покупает товар хотя бы раз в два месяца, то ему присваивается статус: Постоянный
+c.	Если он не купил товар хотя бы раз за два месяца, то ему присваиваться статус: потенциально ушедший
+d.	Если он не купил товар хотя бы раз за 4 месяца, то ему присваиваться статус: Ушедший
+Необходимо собрать таблицу, в которой на каждый месяц, для каждой компании будет проставлен один из 4 статусов. Дату в таблице сделать как «Дата начало месяца».
+*/
+select startMonth, companyName, 'Новый' as stat --поиск новых
+from(
+select ISNULL(companyName, 'иные') as companyName, DATEADD(day, 1, EOMONTH(dateId)) as startMonth, rank() over (partition by companyName order by DATEADD(day, 1, EOMONTH(dateId))) as row
+from distributor.singleSales
+group by companyName, DATEADD(day, 1, EOMONTH(dateId))) as a
+where row = 1
+
+union
+
+select startMonth, companyName, stat = case 
+                                        when last_sale > 2 and last_sale <= 4  then 'потенциально ушедший'
+                                        when last_sale > 4 then 'ушедший'
+                                        end
+                                        --мы считаем что для каждого месяца важны продажи за предыдущие месяцы а не прошлые, 
+                                        --то есть если он является 'ушедшим' на какую-то дату, то это не значит что и в слежущие четыре месяца он ничего не покупал
+from(
+    select startMonth, companyName, datediff(month, lag(startMonth, 1, startMonth) over (partition by companyName order by startMonth), startMonth) as last_sale
+    from(
+        select ISNULL(companyName, 'иные') as companyName, DATEADD(day, 1, EOMONTH(dateId)) as startMonth, 
+                rank() over (partition by companyName order by DATEADD(day, 1, EOMONTH(dateId))) as row
+        from distributor.singleSales
+        group by companyName, DATEADD(day, 1, EOMONTH(dateId))) as b) as c
+where last_sale > 2
+
+union
+
+select *
+from(
+    select startMonth, companyName, stat = case 
+                    when max(last_sale) over (partition by companyName order by startMonth rows between unbounded PRECEDING and CURRENT ROW) between 1 and 2 then 'постоянный'
+                    end --мы присваем статус постоянного если компания все время что покупает у нас соответсвует условия постоянного
+                    --однождый потеряв, уже не вернуть 
+    from(
+        select companyName, startMonth, datediff(month, lag(startMonth, 1, startMonth) over (partition by companyName order by startMonth), startMonth) as last_sale
+        from(
+            select ISNULL(companyName, 'иные') as companyName, DATEADD(day, 1, EOMONTH(dateId)) as startMonth
+            from distributor.singleSales
+            group by companyName, DATEADD(day, 1, EOMONTH(dateId))) as b
+        ) as f
+    ) as g
+where stat is not NULL
+order by startMonth, companyName
