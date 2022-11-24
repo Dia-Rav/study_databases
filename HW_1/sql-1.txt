@@ -66,5 +66,3 @@ AND fullname is not NULL
 GROUP BY fullname
 HAVING sum(salesRub) > 2000000
 
-Task 34:
-
