@@ -10,7 +10,7 @@ from(
             from distributor.singleSales
             WHERE companyName is not null
             GROUP BY companyName, dateId) as a) as b
-    WHERE DATEDIFF(month, dateId, dateId2) is not NULL) as c
+    WHERE DATEDIFF(day, dateId, dateId2) is not NULL) as c
 GROUP BY companyName
 
 Task 7
@@ -23,8 +23,8 @@ Task 1
 select year(dateId) as [year], month(dateId) as [month], branchId, sum(salesRub) as revenue
 from distributor.sales
 where branchId is not null
-group by year(dateId),month(dateId) , branchId
-order by branchId
+group by year(dateId),month(dateId), branchId
+order by branchId, year(dateId),month(dateId)
 
 Task 5
 --Показывает отличающиеся строки
@@ -79,7 +79,7 @@ Task 25
 select a.weekday, CAST(a.quantity as float)/CAST(a.sum_q as float) as [колич. коэффициент], 
 CAST(a.money as float)/CAST(a.sum_m as float) as [цен. коэфф.]
 from(SELECT DISTINCT DATEPART(weekday, s.dateId) as weekday, count(s.itemId) over(PARTITION by DATEPART(weekday, s.dateId)) as quantity,
-    count(s.itemId) over (PARTITION by 1) as sum_q, count(s.salesRub) over (PARTITION by 1) as sum_m,
+count(s.itemId) over (PARTITION by 1) as sum_q, count(s.salesRub) over (PARTITION by 1) as sum_m,
     count(s.salesRub) over(PARTITION by DATEPART(weekday, s.dateId)) as money
     from distributor.sales as s inner join distributor.item as it
     ON s.itemId = it.itemId
@@ -160,7 +160,7 @@ order by t.salesManagerId, t.years, t.months, t.rev DESC
 
 Task 28 (попробовал отыскать какие обои по материалу и цвету предпочитает каждая компания в определенный месяц, отосртировал по месяцам, чтобы посчитать вклад каждого вида обоев (по двум спецификациям) от суммарной прибыли в определенном месяца на протяжении всех лет. Т.е.выявление сезонных предпочтений как всех компаний, так и по отдельности.
 
-select b.*
+
 select g.months, g. companyName, g.revenue, g.detail1, g.detail2, CASE 
 WHEN contrib != 0 then revenue/ contrib
 ELse 0
