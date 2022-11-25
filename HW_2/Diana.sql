@@ -95,7 +95,7 @@ DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth
 
 select a.*, a.volumeofitems/b.sizeBranch as dolyaofbranch
 from(
-    select branchId, years, months, sum(volumeofitem) as volumeofitems
+    select branchId, years, months, avg(volumeofitem) as volumeofitems
     from (
         select b.branchId, year(b.dateId) as years, MONTH(b.dateId) as months, c.volume*b.remains/c.boxPacking as volumeofitem
         from distributor.remains as b
@@ -120,13 +120,7 @@ from (
     on b.itemId = a.itemId
     where b.category = 'Обои'
     and b.exclusive = 'Да'
-    group by year(dateId), MONTH(dateId), a.itemId) as a
-
-
-    select top(10) itemId, sum(salesRub)
-    from distributor.sales
-    group by itemId
-    order by sum(salesRub) desc
+    group by year(dateId), MONTH(dateId), a.itemId) as ac
     
     
     /*22.	У нас есть правило, если клиент:
