@@ -94,3 +94,22 @@ case
 from distributor.item b inner join distributor.singleSales a on a.itemId=b.itemId
 group by b.fabrica, year(dateId), month(dateId)
 select b.count(itemId)/a.count(itemId)
+
+select a.*  
+from(select year(i.dateId) as years, month(i.dateId) as months, i.salesManagerId, sum(i.salesRub) as revenue,  
+ROW_NUMBER() over(partition by year(i.dateId), month(i.dateId) order by sum(i.salesRub) DESC) as rn 
+from distributor.sales as i 
+where i.salesManagerId is not null 
+group by  year(i.dateId), month(i.dateId), salesManagerId) as a 
+where a.rn<3 
+order by a.years, a.months, a.salesManagerId, a.revenue DESC 
+ 
+select a.*  
+from(select year(s.dateId) as years, i.brand,i.itemName,sum(s.salesRub) as revenue,  
+ROW_NUMBER() over(partition by year(s.dateId),brand order by sum(s.salesRub) DESC) as rn 
+from distributor.item as i 
+INNER join distributor.sales as s on i.itemId=s.itemId 
+where i.brand is not null 
+group by i.brand,i.itemName, year(s.dateId)) as a 
+where a.rn<4 
+order by a.years, a.brand, a.revenue DESC
