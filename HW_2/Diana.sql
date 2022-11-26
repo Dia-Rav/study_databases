@@ -95,7 +95,7 @@ DATEADD(month, DATEDIFF(month, 0, dateId), 0) AS StartOfMonth
 
 select a.*, a.volumeofitems/b.sizeBranch as dolyaofbranch
 from(
-    select branchId, years, months, avg(volumeofitem) as volumeofitems
+    select branchId, years, months, sum(volumeofitem)/DAY(EOMONTH(dateId)) as avgvolumeofitems
     from (
         select b.branchId, year(b.dateId) as years, MONTH(b.dateId) as months, c.volume*b.remains/c.boxPacking as volumeofitem
         from distributor.remains as b
